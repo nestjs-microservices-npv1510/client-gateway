@@ -7,13 +7,21 @@ import {
   Param,
   Delete,
   Inject,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ClientProxy } from '@nestjs/microservices';
+
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import * as config from '../config';
+import { catchError } from 'rxjs';
+import { OrderPaginationDTO } from 'src/common/dto/order-pagination.dto';
+import { StatusDto } from './dto/status.dto';
+import { PaginationDTO } from 'src/common/dto/pagination.dto';
+import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -24,22 +32,53 @@ export class OrdersController {
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
+    console.log(createOrderDto);
     return this.ordersClient.send({ cmd: 'create_order' }, createOrderDto);
   }
 
+  // Get all orders
   @Get()
-  findAll() {
-    return this.ordersClient.send({ cmd: 'find_all_orders' }, {});
+  findAll(@Query() orderPaginationDto: OrderPaginationDTO) {
+    return this.ordersClient.send(
+      { cmd: 'find_all_orders' },
+      orderPaginationDto,
+    );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersClient.send({ cmd: 'find_an_order' }, {});
+  // Get all orders (alternative) by status
+  @Get(':status')
+  findAllOrdersByStatus(
+    @Param() statusDto: StatusDto,
+    @Query() paginationDto: PaginationDTO,
+  ) {
+    return this.ordersClient.send(
+      { cmd: 'find_all_orders' },
+      { ...statusDto, ...paginationDto },
+    );
+  }
+
+  @Get('id/:id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ordersClient.send({ cmd: 'find_an_order' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersClient.send({ cmd: '' }, {});
+  changeOrderStatus(
+    @Param('id') id: number,
+    @Body() changeOrderStatusDto: ChangeOrderStatusDto,
+  ) {
+    // return { id, ...changeOrderStatusDto };
+    return this.ordersClient
+      .send({ cmd: 'change_order_status' }, { id, ...changeOrderStatusDto })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Delete(':id')

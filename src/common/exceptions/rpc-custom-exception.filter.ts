@@ -8,6 +8,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { isNumber } from 'class-validator';
+import { stat } from 'fs';
 import { Observable, throwError } from 'rxjs';
 
 @Catch(RpcException)
@@ -15,7 +17,7 @@ export class CustomRpcExceptionFilter
   implements RpcExceptionFilter<RpcException>
 {
   catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
-    console.log('GLOBAL FILTER');
+    console.log('⚠️⚠️ FROM GLOBAL FILTER');
 
     const context = host.switchToHttp();
     const res = context.getResponse();
@@ -23,11 +25,11 @@ export class CustomRpcExceptionFilter
 
     const { status, message } = Object(exception.getError());
 
-    if (status && message)
+    if (status && isNumber(status) && message)
       return res.status(status).json({ status: status, message });
 
     return res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .json({ status: status, message: 'Something went wrong ' });
+      .json({ status: 500, message: 'Something went wrong' });
   }
 }
