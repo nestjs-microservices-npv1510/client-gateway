@@ -5,6 +5,7 @@ import {
   Get,
   Inject,
   Param,
+  ParseArrayPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -83,5 +84,17 @@ export class ProductsController {
         throw new RpcException(err);
       }),
     );
+  }
+
+  @Post('validate')
+  validateProducts(@Body('products', ParseArrayPipe) productIds: number[]) {
+    // return productIds;
+    return this.productsClient
+      .send({ cmd: 'validate_products' }, productIds)
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 }

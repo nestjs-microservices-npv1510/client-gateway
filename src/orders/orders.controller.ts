@@ -32,8 +32,13 @@ export class OrdersController {
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    console.log(createOrderDto);
-    return this.ordersClient.send({ cmd: 'create_order' }, createOrderDto);
+    // return createOrderDto;
+
+    return this.ordersClient.send({ cmd: 'create_order' }, createOrderDto).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 
   // Get all orders
