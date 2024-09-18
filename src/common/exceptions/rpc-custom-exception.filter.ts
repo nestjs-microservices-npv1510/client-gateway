@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { isNumber } from 'class-validator';
-import { stat } from 'fs';
 import { Observable, throwError } from 'rxjs';
 
 @Catch(RpcException)

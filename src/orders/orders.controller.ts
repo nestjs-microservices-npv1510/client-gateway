@@ -26,14 +26,12 @@ import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 @Controller('orders')
 export class OrdersController {
   constructor(
-    @Inject(config.ORDER_MICROSERVICE_NAME)
+    @Inject(config.NATS_SERVICE_NAME)
     private readonly ordersClient: ClientProxy,
   ) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    // return createOrderDto;
-
     return this.ordersClient.send({ cmd: 'create_order' }, createOrderDto).pipe(
       catchError((err) => {
         throw new RpcException(err);

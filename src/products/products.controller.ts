@@ -14,7 +14,7 @@ import {
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 import { PaginationDTO } from 'src/common/dto/pagination.dto';
-import { PRODUCT_MICROSERVICE_NAME } from 'src/config';
+import { NATS_SERVICE_NAME, PRODUCT_MICROSERVICE_NAME } from 'src/config';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 // import { ProductsService } from './products.service';
@@ -22,17 +22,20 @@ import { UpdateProductDto } from './dto/update-product.dto';
 @Controller('products')
 export class ProductsController {
   constructor(
-    @Inject(PRODUCT_MICROSERVICE_NAME)
+    @Inject(NATS_SERVICE_NAME)
     private readonly productsClient: ClientProxy,
   ) {}
 
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
     // console.log(createProductDto);
-    return this.productsClient.send(
-      { cmd: 'create_product' },
-      createProductDto,
-    );
+    return this.productsClient
+      .send({ cmd: 'create_product' }, createProductDto)
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Get()

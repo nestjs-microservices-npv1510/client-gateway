@@ -3,20 +3,10 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import * as config from 'src/config';
+import { NatsModule } from 'src/transports/nats.module';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: config.ORDER_MICROSERVICE_NAME,
-        transport: Transport.TCP,
-        options: {
-          host: config.ORDER_MICROSERVICE_HOST,
-          port: config.ORDER_MICROSERVICE_PORT,
-        },
-      },
-    ]),
-  ],
+  imports: [NatsModule],
   controllers: [OrdersController],
   providers: [OrdersService],
 })

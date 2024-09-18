@@ -12,6 +12,9 @@ interface EnvVars {
   // Order microservice
   ORDER_MICROSERVICE_HOST: string;
   ORDER_MICROSERVICE_PORT: number;
+
+  // NATS
+  NATS_SERVER: string[];
 }
 
 const envSchema = joi
@@ -24,6 +27,8 @@ const envSchema = joi
     ORDER_MICROSERVICE_HOST: joi.string().required(),
     ORDER_MICROSERVICE_PORT: joi.number().required(),
 
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
+
     // DATABASE_URL: joi.string().required(),
     // JWT_SECRET: joi.string().required(),
     // SESSION_SECRET: joi.string().required(),
@@ -32,7 +37,10 @@ const envSchema = joi
 
 // console.log('FROM ENVS: ');
 // console.log(process.env);
-const { error, value } = envSchema.validate(process.env);
+const { error, value } = envSchema.validate({
+  ...process.env,
+  NATS_SERVERS: process.env.NATS_SERVERS?.split('.'),
+});
 // console.log(value);
 
 if (error) {
@@ -47,4 +55,5 @@ export const {
   PRODUCT_MICROSERVICE_PORT,
   ORDER_MICROSERVICE_HOST,
   ORDER_MICROSERVICE_PORT,
+  NATS_SERVER,
 } = envVars;
