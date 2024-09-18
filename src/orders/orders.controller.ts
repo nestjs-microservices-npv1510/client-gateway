@@ -17,11 +17,12 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import * as config from '../config';
-import { catchError } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import { OrderPaginationDTO } from 'src/common/dto/order-pagination.dto';
 import { StatusDto } from './dto/status.dto';
 import { PaginationDTO } from 'src/common/dto/pagination.dto';
 import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
+import { isInstance } from 'class-validator';
 
 @Controller('orders')
 export class OrdersController {
@@ -41,11 +42,16 @@ export class OrdersController {
 
   // Get all orders
   @Get()
-  findAll(@Query() orderPaginationDto: OrderPaginationDTO) {
-    return this.ordersClient.send(
-      { cmd: 'find_all_orders' },
-      orderPaginationDto,
-    );
+  async findAll(@Query() orderPaginationDto: OrderPaginationDTO) {
+    try {
+      const orders = await firstValueFrom(
+        this.ordersClient.send({ cmd: 'find_all_orders' }, orderPaginationDto),
+      );
+
+      // console.log(orders);
+    } catch (err) {
+      throw new RpcException(err);
+    }
   }
 
   // Get all orders (alternative) by status

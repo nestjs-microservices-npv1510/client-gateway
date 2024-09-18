@@ -14,7 +14,7 @@ interface EnvVars {
   ORDER_MICROSERVICE_PORT: number;
 
   // NATS
-  NATS_SERVER: string[];
+  NATS_SERVERS: string[];
 }
 
 const envSchema = joi
@@ -39,7 +39,7 @@ const envSchema = joi
 // console.log(process.env);
 const { error, value } = envSchema.validate({
   ...process.env,
-  NATS_SERVERS: process.env.NATS_SERVERS?.split('.'),
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(','),
 });
 // console.log(value);
 
@@ -48,12 +48,11 @@ if (error) {
 }
 
 const envVars: EnvVars = value;
-
 export const {
   PORT,
   PRODUCT_MICROSERVICE_HOST,
   PRODUCT_MICROSERVICE_PORT,
   ORDER_MICROSERVICE_HOST,
   ORDER_MICROSERVICE_PORT,
-  NATS_SERVER,
+  NATS_SERVERS,
 } = envVars;

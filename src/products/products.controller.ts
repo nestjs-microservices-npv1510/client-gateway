@@ -19,6 +19,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 // import { ProductsService } from './products.service';
 
+import * as config from '../config';
+
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -40,6 +42,7 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() paginationDto: PaginationDTO) {
+    // console.log(paginationDto);
     return this.productsClient.send(
       { cmd: 'find_all_products' },
       paginationDto,

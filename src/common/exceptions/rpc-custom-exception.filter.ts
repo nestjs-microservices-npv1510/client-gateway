@@ -16,16 +16,22 @@ export class CustomRpcExceptionFilter
   implements RpcExceptionFilter<RpcException>
 {
   catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
-    console.log('⚠️⚠️ FROM GLOBAL FILTER');
-
     const context = host.switchToHttp();
     const res = context.getResponse();
     const req = context.getResponse();
 
-    const { status, message } = Object(exception.getError());
+    const rpcError = Object(exception.getError());
+    console.log('⚠️⚠️ FROM GLOBAL FILTER');
+    // console.log(typeof rpcError);
+    console.log(rpcError);
 
-    if (status && isNumber(status) && message)
-      return res.status(status).json({ status: status, message });
+    if (rpcError?.message.includes('Empty response'))
+      return res.status(500).json({ status: 500, message: rpcError.message });
+
+    if (rpcError?.status)
+      return res
+        .status(500)
+        .json({ status: rpcError.status, message: rpcError.message });
 
     return res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)

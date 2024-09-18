@@ -10,7 +10,7 @@ import * as config from '../config';
         name: config.NATS_SERVICE_NAME,
         transport: Transport.NATS,
         options: {
-          servers: config.NATS_SERVER,
+          servers: config.NATS_SERVERS,
         },
       },
     ]),
@@ -21,7 +21,7 @@ import * as config from '../config';
         name: config.NATS_SERVICE_NAME,
         transport: Transport.NATS,
         options: {
-          servers: config.NATS_SERVER,
+          servers: config.NATS_SERVERS,
         },
       },
     ]),
