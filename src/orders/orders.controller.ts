@@ -43,15 +43,13 @@ export class OrdersController {
   // Get all orders
   @Get()
   async findAll(@Query() orderPaginationDto: OrderPaginationDTO) {
-    try {
-      const orders = await firstValueFrom(
-        this.ordersClient.send({ cmd: 'find_all_orders' }, orderPaginationDto),
+    return this.ordersClient
+      .send({ cmd: 'find_all_orders' }, orderPaginationDto)
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
       );
-
-      // console.log(orders);
-    } catch (err) {
-      throw new RpcException(err);
-    }
   }
 
   // Get all orders (alternative) by status
@@ -60,10 +58,13 @@ export class OrdersController {
     @Param() statusDto: StatusDto,
     @Query() paginationDto: PaginationDTO,
   ) {
-    return this.ordersClient.send(
-      { cmd: 'find_all_orders' },
-      { ...statusDto, ...paginationDto },
-    );
+    return this.ordersClient
+      .send({ cmd: 'find_all_orders' }, { ...statusDto, ...paginationDto })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Get('id/:id')

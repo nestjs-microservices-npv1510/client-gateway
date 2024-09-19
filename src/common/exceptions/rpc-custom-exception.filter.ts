@@ -26,7 +26,9 @@ export class CustomRpcExceptionFilter
     console.log(rpcError);
 
     if (rpcError?.message.includes('Empty response'))
-      return res.status(500).json({ status: 500, message: rpcError.message });
+      return res
+        .status(500)
+        .json({ status: 500, message: rpcError.message.split('. ')[1] });
 
     if (rpcError?.status)
       return res
