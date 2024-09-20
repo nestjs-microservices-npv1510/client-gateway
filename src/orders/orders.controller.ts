@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
