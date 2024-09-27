@@ -14,7 +14,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  console.log('HOT RELOADING...')
+  // console.log('HOT RELOADING...')
   app.setGlobalPrefix('/api');
   app.useGlobalPipes(
     new ValidationPipe({

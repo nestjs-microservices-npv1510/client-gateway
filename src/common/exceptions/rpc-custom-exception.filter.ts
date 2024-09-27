@@ -18,7 +18,7 @@ export class CustomRpcExceptionFilter
   catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
     const context = host.switchToHttp();
     const res = context.getResponse();
-    const req = context.getResponse();
+    // const req = context.getResponse();
 
     const rpcError = Object(exception.getError());
     console.log('⚠️⚠️ FROM GLOBAL FILTER');
