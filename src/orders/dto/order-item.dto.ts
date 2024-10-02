@@ -1,15 +1,20 @@
-import { IsNumber, IsPositive } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 export class OrderItemDto {
-  @IsNumber()
   @IsPositive()
   productId: number;
 
-  @IsNumber()
   @IsPositive()
   price: number;
 
-  @IsNumber()
   @IsPositive()
-  quantity: number;
+  @IsOptional()
+  quantity: number = 1;
 }

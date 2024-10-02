@@ -9,70 +9,54 @@ import {
   Inject,
   ParseIntPipe,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
 
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
 
 import * as config from '../config';
 import { catchError, firstValueFrom } from 'rxjs';
-import { OrderPaginationDTO } from 'src/common/dto/order-pagination.dto';
+import { OrderPaginationDTO } from 'src/common/dtos/order-pagination.dto';
 import { StatusDto } from './dto/status.dto';
-import { PaginationDTO } from 'src/common/dto/pagination.dto';
+import { PaginationDTO } from 'src/common/dtos/pagination.dto';
 import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
-import { isInstance } from 'class-validator';
+import { CustomClientProxyService } from 'src/common/services/custom-client-proxy.service';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(
-    @Inject(config.NATS_SERVICE_NAME)
-    private readonly ordersClient: ClientProxy,
-  ) {}
+  constructor(private readonly natsClientProxy: CustomClientProxyService) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersClient.send({ cmd: 'create_order' }, createOrderDto).pipe(
-      catchError((err) => {
-        throw new RpcException(err);
-      }),
-    );
+    // console.log('gateway orders create');
+    // console.log(createOrderDto);
+    // return;
+    return this.natsClientProxy.send('orders.create', createOrderDto);
   }
 
   // Get all orders
   @Get()
-  async findAll(@Query() orderPaginationDto: OrderPaginationDTO) {
-    return this.ordersClient
-      .send({ cmd: 'find_all_orders' }, orderPaginationDto)
-      .pipe(
-        catchError((err) => {
-          throw new RpcException(err);
-        }),
-      );
+  async findMany(@Query() orderPaginationDto: OrderPaginationDTO) {
+    return this.natsClientProxy.send('orders.findMany', orderPaginationDto);
   }
 
   // Get all orders (alternative) by status
   @Get(':status')
-  findAllOrdersByStatus(
+  findManyOrderByStatus(
     @Param() statusDto: StatusDto,
     @Query() paginationDto: PaginationDTO,
   ) {
-    return this.ordersClient
-      .send({ cmd: 'find_all_orders' }, { ...statusDto, ...paginationDto })
-      .pipe(
-        catchError((err) => {
-          throw new RpcException(err);
-        }),
-      );
+    return this.natsClientProxy.send('orders.findMany', {
+      ...statusDto,
+      ...paginationDto,
+    });
   }
 
   @Get('id/:id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.ordersClient.send({ cmd: 'find_an_order' }, { id }).pipe(
-      catchError((err) => {
-        throw new RpcException(err);
-      }),
-    );
+  findOrderById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.natsClientProxy.send('orders.findOrderById', { id });
   }
 
   @Patch(':id')
@@ -81,17 +65,14 @@ export class OrdersController {
     @Body() changeOrderStatusDto: ChangeOrderStatusDto,
   ) {
     // return { id, ...changeOrderStatusDto };
-    return this.ordersClient
-      .send({ cmd: 'change_order_status' }, { id, ...changeOrderStatusDto })
-      .pipe(
-        catchError((err) => {
-          throw new RpcException(err);
-        }),
-      );
+    return this.natsClientProxy.send('orders.changeOrderStatus', {
+      id,
+      ...changeOrderStatusDto,
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersClient.send({ cmd: '' }, {});
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.natsClientProxy.send({ cmd: '' }, {});
+  // }
 }
