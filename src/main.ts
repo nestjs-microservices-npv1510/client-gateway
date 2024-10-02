@@ -13,6 +13,7 @@ import * as envVars from './config';
 import { CustomHttpExceptionFilter } from './common/filters/http-custom-exception.filter';
 import { RpcCatchErrorInterceptor } from './common/interceptors/rpcCatchError.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const logger = new Logger('Main');
@@ -36,6 +37,15 @@ async function bootstrap() {
     new RpcCatchErrorInterceptor(),
     new LoggingInterceptor(),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('NestJs Microservices - Shop API')
+    .setDescription('This is Shop API description')
+    .setVersion('1.0')
+    .addTag('shop')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(envVars.PORT, () => {
     logger.log(`Gateway is running on port ${envVars.PORT}`);
