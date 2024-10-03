@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductResponseDto } from './product-response.dto';
 
 class MetaDataDto {
   @ApiProperty({ example: 5 })
@@ -11,26 +12,6 @@ class MetaDataDto {
   totalItems: number;
 }
 
-class ProductDto {
-  @ApiProperty({ example: 9 })
-  id: number;
-
-  @ApiProperty({ example: 'SmartPhone' })
-  name: string;
-
-  @ApiProperty({ example: 1099.99 })
-  price: number;
-
-  @ApiProperty({ example: true })
-  available: boolean;
-
-  @ApiProperty({ example: '2024-02-27T15:51:13.021Z' })
-  createdAt: string;
-
-  @ApiProperty({ example: '2024-02-27T15:51:13.021Z' })
-  updatedAt: string;
-}
-
 export class FindManyProductsResponseDto {
   @ApiProperty({ example: 'success' })
   status: string;
@@ -38,6 +19,6 @@ export class FindManyProductsResponseDto {
   @ApiProperty({ type: MetaDataDto })
   metaData: MetaDataDto;
 
-  @ApiProperty({ type: [ProductDto] })
-  products: ProductDto[];
+  @ApiProperty({ type: [ProductResponseDto] })
+  products: ProductResponseDto[];
 }

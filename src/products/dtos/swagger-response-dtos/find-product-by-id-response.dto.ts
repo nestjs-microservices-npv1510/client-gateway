@@ -8,11 +8,3 @@ export class FindProductByIdSuccessResDto {
   @ApiProperty({ type: [ProductResponseDto] })
   product: ProductResponseDto;
 }
-
-export class FindProductByIdFailedResDto {
-  @ApiProperty({ example: 'failed' })
-  status: string;
-
-  @ApiProperty({ example: 'Product with id #5 not found' })
-  message: string;
-}

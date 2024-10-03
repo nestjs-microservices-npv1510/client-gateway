@@ -1,6 +1,11 @@
 // Nestjs
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import {
+  HttpStatus,
+  Logger,
+  UnprocessableEntityException,
+  ValidationPipe,
+} from '@nestjs/common';
 
 // module
 import { AppModule } from './app.module';
@@ -25,6 +30,13 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      // exceptionFactory: (errors = []) => {
+      //   return {
+      //     isValidationPipeError: true,
+      //     statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      //     errors,
+      //   };
+      // },
     }),
   );
 

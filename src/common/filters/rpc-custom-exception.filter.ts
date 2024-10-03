@@ -32,7 +32,10 @@ export class CustomRpcExceptionFilter
     // return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ errorDetails });
 
     // LOGGING
-    this.logger.error(JSON.stringify(errorDetails));
+    this.logger.error(
+      `Error name: ${errorDetails.name || 'Unknown error type'}`,
+    );
+    this.logger.error(`Error: ${JSON.stringify(errorDetails)}`);
 
     // errDetails là Object
     if (typeof errorDetails === 'object') {
@@ -40,43 +43,50 @@ export class CustomRpcExceptionFilter
 
       // response information
       let { statusCode, message, ...othersData } = errorDetails;
-
       statusCode ||= HttpStatus.INTERNAL_SERVER_ERROR;
       message ||= 'Something went wrong';
-
       let status = `${statusCode}`.startsWith('4') ? 'failed' : 'error';
 
-      // Validation pipe
+      // Validation pipe exception
       if (errorDetails.name === 'BadRequestException') {
-        statusCode = HttpStatus.BAD_REQUEST;
-        let status = `${statusCode}`.startsWith('4') ? 'failed' : 'error';
+        statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
+        status = `${statusCode}`.startsWith('4') ? 'failed' : 'error';
 
         const messages = errorDetails.response.message;
         return res.status(statusCode).json({ status, message: messages });
       }
 
-      // Prisma unique constraint
+      // PrismaClientValidationError && code = P2002
       if (errorCode === 'P2002') {
         const meta = errorDetails.meta; // Nếu có metadata chứa chi tiết hơn
         const { modelName: resource, target: uniqueField } = meta;
 
+        statusCode = HttpStatus.CONFLICT;
+        status = `${statusCode}`.startsWith('4') ? 'failed' : 'error';
         message = `${resource} ${uniqueField} is duplicated`;
+
         return res.status(statusCode).json({ status, message });
       }
 
-      // console.log('others data:', othersData);
-      if (othersData)
-        return res.status(statusCode).json({ status, message, ...othersData });
+      // Error from parse pipe (with details)
+      if (errorDetails.response) statusCode = errorDetails.response.statusCode;
+      // Error not from parse pipe (with my details)
+      else {
+        if (othersData)
+          return res
+            .status(statusCode)
+            .json({ status, message, ...othersData });
+      }
+
       return res.status(statusCode).json({ status, message });
     }
 
     // errorDetails là string
     else {
-      const message = errorDetails.message;
-      const statusCode = errorDetails.statusCode || 500;
-      const status = `${statusCode}`.startsWith('4') ? 'failed' : 'error';
-
-      return res.status(statusCode).json({ status, message });
+      this.logger.error('String RpcError: ', errorDetails);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ status: 'error', message: errorDetails });
     }
   }
 }
